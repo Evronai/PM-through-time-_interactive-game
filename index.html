@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Project Manager Through Time</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Lato:wght@400;700;900&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1209;
+  --parchment: #f5f0e8;
+  --parchment2: #ede6d3;
+  --gold: #c9922a;
+  --gold2: #e8b84b;
+  --rust: #9b3a1a;
+  --teal: #1a6b6b;
+  --slate: #3d4f5c;
+  --green: #2d6a2d;
+  --red: #8b1a1a;
+  --cream: #faf7f0;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--ink);font-family:'Lato',sans-serif;color:var(--ink);min-height:100vh;overflow-x:hidden;}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* ── HOME ── */
+#home{background:var(--ink);align-items:center;justify-content:center;text-align:center;padding:40px 20px;position:relative;overflow:hidden;}
+#home::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 60px,rgba(201,146,42,0.03) 60px,rgba(201,146,42,0.03) 61px);}
+.home-inner{position:relative;z-index:1;max-width:600px;}
+.home-eyebrow{font-family:'Special Elite',cursive;font-size:12px;letter-spacing:4px;color:var(--gold2);text-transform:uppercase;margin-bottom:20px;}
+.home-title{font-family:'Playfair Display',serif;font-size:clamp(2.4rem,7vw,4rem);font-weight:900;color:var(--parchment);line-height:1.1;margin-bottom:16px;}
+.home-title em{color:var(--gold2);font-style:italic;}
+.home-sub{font-size:16px;color:#a09080;line-height:1.7;margin-bottom:40px;}
+.project-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:40px;}
+.project-card{background:rgba(255,255,255,0.05);border:1px solid rgba(201,146,42,0.3);border-radius:8px;padding:18px 14px;cursor:pointer;transition:all 0.2s;text-align:center;}
+.project-card:hover{background:rgba(201,146,42,0.12);border-color:var(--gold);transform:translateY(-3px);}
+.project-card .pc-emoji{font-size:32px;margin-bottom:10px;}
+.project-card .pc-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--parchment);margin-bottom:4px;}
+.project-card .pc-era{font-size:11px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;}
+.project-card .pc-diff{font-size:10px;color:#6b5e4a;margin-top:6px;letter-spacing:1px;}
+
+/* ── GAME SCREEN ── */
+#game{background:var(--parchment);flex-direction:column;}
+
+.game-header{background:var(--ink);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;border-bottom:2px solid var(--gold);}
+.game-project-name{font-family:'Playfair Display',serif;color:var(--gold2);font-size:18px;font-weight:700;}
+.game-stats{display:flex;gap:16px;flex-wrap:wrap;}
+.stat-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.08);border-radius:20px;padding:5px 12px;}
+.stat-icon{font-size:14px;}
+.stat-val{font-size:13px;font-weight:700;color:var(--parchment);}
+.stat-label{font-size:10px;color:#6b5e4a;letter-spacing:1px;text-transform:uppercase;}
+
+.game-body{flex:1;max-width:760px;margin:0 auto;padding:28px 20px;width:100%;}
+
+/* progress bar */
+.phase-bar{display:flex;gap:6px;margin-bottom:28px;}
+.phase-pip{flex:1;height:6px;border-radius:3px;background:#ddd4c0;transition:background 0.3s;}
+.phase-pip.done{background:var(--gold);}
+.phase-pip.current{background:var(--gold2);}
+
+/* scene card */
+.scene-card{background:#fff;border-radius:6px;border:1px solid #ddd4c0;border-top:4px solid var(--gold);box-shadow:4px 5px 0 rgba(0,0,0,0.08);padding:28px 28px 22px;margin-bottom:20px;}
+.scene-phase{font-family:'Special Elite',cursive;font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;}
+.scene-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--ink);margin-bottom:12px;line-height:1.3;}
+.scene-situation{font-size:15px;color:#3a3228;line-height:1.8;margin-bottom:16px;}
+.scene-flavour{font-size:13px;color:#8a7a6a;font-style:italic;border-left:3px solid var(--gold);padding-left:14px;margin-bottom:0;line-height:1.7;}
+
+/* choices */
+.choices{display:grid;gap:10px;margin-bottom:20px;}
+.choice-btn{background:#fff;border:2px solid #ddd4c0;border-radius:6px;padding:14px 18px;text-align:left;cursor:pointer;transition:all 0.18s;font-family:'Lato',sans-serif;font-size:14px;color:#3a3228;line-height:1.5;display:flex;gap:14px;align-items:flex-start;}
+.choice-btn:hover{border-color:var(--gold);background:var(--parchment);transform:translateX(3px);}
+.choice-btn.chosen-good{border-color:var(--green);background:#f0faf0;pointer-events:none;}
+.choice-btn.chosen-bad{border-color:var(--red);background:#faf0f0;pointer-events:none;}
+.choice-btn.chosen-neutral{border-color:var(--slate);background:#f0f4f7;pointer-events:none;}
+.choice-btn.not-chosen{opacity:0.4;pointer-events:none;}
+.choice-letter{font-weight:900;font-size:15px;color:var(--gold);flex-shrink:0;width:20px;}
+
+/* outcome */
+.outcome-box{border-radius:6px;padding:16px 20px;margin-bottom:20px;display:none;font-size:14px;line-height:1.7;}
+.outcome-box.show{display:block;}
+.outcome-box.good{background:#f0faf0;border:1px solid #86c986;border-left:4px solid var(--green);}
+.outcome-box.bad{background:#faf0f0;border:1px solid #c98686;border-left:4px solid var(--red);}
+.outcome-box.neutral{background:#f0f4f7;border:1px solid #8696c9;border-left:4px solid var(--slate);}
+.outcome-title{font-weight:900;font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.outcome-box.good .outcome-title{color:var(--green);}
+.outcome-box.bad .outcome-title{color:var(--red);}
+.outcome-box.neutral .outcome-title{color:var(--slate);}
+.stat-change{font-size:12px;margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;}
+.sc-item{padding:3px 10px;border-radius:10px;font-weight:700;}
+.sc-pos{background:#e0f4e0;color:var(--green);}
+.sc-neg{background:#f4e0e0;color:var(--red);}
+.sc-neu{background:#e0e8f4;color:var(--slate);}
+
+.next-btn{background:var(--gold);border:none;border-radius:6px;padding:13px 28px;font-family:'Lato',sans-serif;font-size:15px;font-weight:900;color:var(--ink);cursor:pointer;transition:all 0.2s;display:none;letter-spacing:0.5px;}
+.next-btn.show{display:inline-block;}
+.next-btn:hover{background:var(--gold2);transform:translateY(-2px);}
+
+/* ── END SCREEN ── */
+#end{background:var(--ink);align-items:center;justify-content:center;text-align:center;padding:40px 20px;}
+.end-inner{max-width:560px;}
+.end-project{font-family:'Special Elite',cursive;font-size:12px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;}
+.end-emoji{font-size:72px;margin-bottom:16px;}
+.end-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,5vw,3rem);font-weight:900;color:var(--parchment);margin-bottom:10px;line-height:1.2;}
+.end-score-ring{width:130px;height:130px;border-radius:50%;border:4px solid var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:24px auto;}
+.end-score-n{font-family:'Playfair Display',serif;font-size:40px;font-weight:900;color:var(--gold2);line-height:1;}
+.end-score-l{font-size:11px;color:#a09080;letter-spacing:2px;text-transform:uppercase;margin-top:4px;}
+.end-verdict{font-size:16px;color:#c8bfb0;line-height:1.7;margin-bottom:28px;max-width:420px;margin-left:auto;margin-right:auto;}
+.end-stats{display:flex;gap:20px;justify-content:center;margin-bottom:32px;flex-wrap:wrap;}
+.end-stat{text-align:center;}
+.end-stat-n{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--gold2);}
+.end-stat-l{font-size:11px;color:#6b5e4a;letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+.end-buttons{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.btn-primary{background:var(--gold);border:none;border-radius:6px;padding:14px 28px;font-family:'Lato',sans-serif;font-size:15px;font-weight:900;color:var(--ink);cursor:pointer;transition:all 0.2s;}
+.btn-primary:hover{background:var(--gold2);}
+.btn-secondary{background:transparent;border:1px solid rgba(201,146,42,0.4);border-radius:6px;padding:14px 28px;font-family:'Lato',sans-serif;font-size:15px;font-weight:700;color:#c8bfb0;cursor:pointer;transition:all 0.2s;}
+.btn-secondary:hover{border-color:var(--gold);color:var(--parchment);}
+
+/* stat bar */
+.stat-bar-wrap{margin-bottom:6px;}
+.stat-bar-label{display:flex;justify-content:space-between;font-size:12px;color:#6b5e4a;margin-bottom:3px;}
+.stat-bar-track{height:8px;background:#ddd4c0;border-radius:4px;overflow:hidden;}
+.stat-bar-fill{height:100%;border-radius:4px;transition:width 0.4s ease;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.scene-card,.choices,.outcome-box{animation:fadeUp 0.3s ease forwards;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HOME ══════════════ -->
+<div id="home" class="screen active">
+  <div class="home-inner">
+    <div class="home-eyebrow">An Interactive PM Adventure</div>
+    <h1 class="home-title">Project Manager<br/><em>Through Time</em></h1>
+    <p class="home-sub">You're the PM. The budget is tight. The sponsor is breathing down your neck. History is watching.<br/>Can you deliver?</p>
+    <div class="project-grid" id="projectGrid"></div>
+    <p style="font-size:12px;color:#4a3e30;letter-spacing:1px;">SELECT A PROJECT TO MANAGE</p>
+  </div>
+</div>
+
+<!-- ══════════════ GAME ══════════════ -->
+<div id="game" class="screen">
+  <div class="game-header">
+    <div class="game-project-name" id="headerName"></div>
+    <div class="game-stats">
+      <div class="stat-pill"><span class="stat-icon">💰</span><span class="stat-val" id="statBudget">100</span><span class="stat-label">Budget</span></div>
+      <div class="stat-pill"><span class="stat-icon">⏱</span><span class="stat-val" id="statSchedule">100</span><span class="stat-label">Schedule</span></div>
+      <div class="stat-pill"><span class="stat-icon">👥</span><span class="stat-val" id="statTeam">100</span><span class="stat-label">Team</span></div>
+      <div class="stat-pill"><span class="stat-icon">😤</span><span class="stat-val" id="statSponsor">100</span><span class="stat-label">Sponsor</span></div>
+    </div>
+  </div>
+  <div class="game-body">
+    <div class="phase-bar" id="phaseBar"></div>
+    <div class="scene-card">
+      <div class="scene-phase" id="scenePhase"></div>
+      <div class="scene-title" id="sceneTitle"></div>
+      <div class="scene-situation" id="sceneSituation"></div>
+      <div class="scene-flavour" id="sceneFlavour"></div>
+    </div>
+    <div class="choices" id="choices"></div>
+    <div class="outcome-box" id="outcomeBox">
+      <div class="outcome-title" id="outcomeTitle"></div>
+      <div id="outcomeText"></div>
+      <div class="stat-change" id="statChange"></div>
+    </div>
+    <button class="next-btn" id="nextBtn" onclick="nextScene()">Continue →</button>
+  </div>
+</div>
+
+<!-- ══════════════ END ══════════════ -->
+<div id="end" class="screen">
+  <div class="end-inner">
+    <div class="end-project" id="endProject"></div>
+    <div class="end-emoji" id="endEmoji"></div>
+    <h2 class="end-title" id="endTitle"></h2>
+    <div class="end-score-ring">
+      <div class="end-score-n" id="endScore"></div>
+      <div class="end-score-l">Score</div>
+    </div>
+    <p class="end-verdict" id="endVerdict"></p>
+    <div class="end-stats">
+      <div class="end-stat"><div class="end-stat-n" id="endBudget"></div><div class="end-stat-l">💰 Budget</div></div>
+      <div class="end-stat"><div class="end-stat-n" id="endSchedule"></div><div class="end-stat-l">⏱ Schedule</div></div>
+      <div class="end-stat"><div class="end-stat-n" id="endTeam"></div><div class="end-stat-l">👥 Team</div></div>
+      <div class="end-stat"><div class="end-stat-n" id="endSponsor"></div><div class="end-stat-l">😤 Sponsor</div></div>
+    </div>
+    <div class="end-buttons">
+      <button class="btn-primary" onclick="replayProject()">🔄 Try Again</button>
+      <button class="btn-secondary" onclick="goHome()">🏠 Pick Another Project</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// PROJECTS DATA
+// ══════════════════════════════════════════════
+const PROJECTS = [
+  {
+    id:"pyramid",
+    emoji:"🏔️",
+    name:"The Great Pyramid",
+    era:"2650 BCE · Egypt",
+    diff:"★★★☆☆",
+    color:"#c9922a",
+    intro:"Pharaoh Khufu wants a pyramid. A big one. THE biggest one. You have 20 years, 20,000 workers, and a sponsor who will literally have you executed if you fail. No pressure.",
+    scenes:[
+      {
+        phase:"Initiation",
+        title:"The Pharaoh Summons You",
+        situation:"Pharaoh Khufu slaps a papyrus scroll on the table. 'I want a pyramid. 146 metres tall. Finished before I die. How long will it take?' Your lead engineer whispers: 'Realistically... 25 years.' Khufu's deadline: 20 years.",
+        flavour:"The Pharaoh drums his fingers on the golden armrest. The guards shift their spears.",
+        choices:[
+          {text:"Promise 20 years. Figure it out later.", outcome:"good", title:"Bold Commitment!", explanation:"Khufu is delighted. You're committed, but now you need a miracle. Your sponsor satisfaction soars — for now.", budget:0,schedule:-5,team:0,sponsor:20},
+          {text:"Negotiate honestly: '22 years, guaranteed quality.'", outcome:"neutral", title:"Honest Estimate", explanation:"Khufu grumbles but respects you. A small delay on his expectations, but no nasty surprises later.", budget:0,schedule:5,team:5,sponsor:-5},
+          {text:"Say '15 years!' to impress him.", outcome:"bad", title:"Catastrophic Over-Promise", explanation:"Khufu immediately tells the court. You've set an impossible target. The whole project is already behind schedule before a single stone is moved.", budget:0,schedule:-20,team:-5,sponsor:10},
+        ]
+      },
+      {
+        phase:"Planning",
+        title:"The Stone Supply Problem",
+        situation:"Your supply chain manager rushes in: 'The limestone quarry at Tura is 900km away by river. We need 2.3 million blocks. Either we build 50 barges and keep them running all year, or we find a local source — lower quality but 5km away.'",
+        flavour:"A bead of sweat runs down your brow. The Nile is low this season.",
+        choices:[
+          {text:"Use local stone. Save budget, accept quality risk.", outcome:"neutral", title:"Pragmatic Sourcing", explanation:"You save a fortune on logistics but Khufu notices the rougher finish on some stones. He's not thrilled but not murderous.", budget:15,schedule:5,team:0,sponsor:-10},
+          {text:"Build the barges. Premium stone, premium project.", outcome:"good", title:"Supply Chain Mastery", explanation:"The logistics are complex but you've planned them brilliantly. Quality stays high and the river route creates a reliable supply rhythm.", budget:-15,schedule:0,team:5,sponsor:10},
+          {text:"Ask Khufu to choose — it's his pyramid.", outcome:"bad", title:"Escalation Fail", explanation:"Khufu is furious. 'I hired YOU to manage this! Why are you asking ME?' He docks your budget as punishment for wasting his time.", budget:-20,schedule:-5,team:-5,sponsor:-15},
+        ]
+      },
+      {
+        phase:"Execution",
+        title:"The Workers Are Struggling",
+        situation:"It's Year 3. Workers are exhausted. Your site foreman reports that productivity has dropped 30%. A team of scribes suggests giving workers better food, rest days, and recognition ceremonies. But that costs money and time.",
+        flavour:"The wind howls across the plateau. Somewhere, a chisel rings against stone.",
+        choices:[
+          {text:"Invest in worker welfare. Better food, rest days.", outcome:"good", title:"People First!", explanation:"Productivity bounces back to 120% of original levels. Turns out, fed and rested workers move faster. Who knew? (Everyone. Everyone knew.)", budget:-10,schedule:10,team:20,sponsor:0},
+          {text:"Push harder. Speed up or else.", outcome:"bad", title:"Workers Down Tools", explanation:"Three work gangs walk off the site. You lose two weeks of progress and spend a month rebuilding trust. The great motivational speech of 2647 BCE goes poorly.", budget:-5,schedule:-20,team:-25,sponsor:-10},
+          {text:"Split the difference — some improvements, keep pace.", outcome:"neutral", title:"Balanced Approach", explanation:"Morale improves modestly. Not the roaring success of full investment, but the project ticks forward without crisis.", budget:-5,schedule:5,team:8,sponsor:0},
+        ]
+      },
+      {
+        phase:"Execution",
+        title:"Khufu Changes His Mind",
+        situation:"Year 8. Khufu decides he wants an internal 'King's Chamber' added — not in the original plan. Your architect goes pale. This requires rerouting internal shafts through already-built sections. It will cost enormously.",
+        flavour:"'A Pharaoh's greatness must be housed in greatness,' Khufu says. There is no room for disagreement.",
+        choices:[
+          {text:"Agree immediately. The Pharaoh is always right.", outcome:"bad", title:"Yes-Man Disaster", explanation:"The unplanned rerouting causes structural complications and costs twice what anyone estimated. Classic scope creep with no change control.", budget:-25,schedule:-15,team:-10,sponsor:5},
+          {text:"Present the full impact — cost, time, risk — and ask for formal approval.", outcome:"good", title:"Change Control Champion!", explanation:"Khufu is surprised but impressed by your preparation. He approves with a budget increase. You've just invented formal change control in 2642 BCE.", budget:10,schedule:-10,team:5,sponsor:15},
+          {text:"Quietly absorb it. Don't mention the impact.", outcome:"bad", title:"Hidden Problem Grows", explanation:"The hidden cost eats your contingency reserve. When the budget runs out with the project unfinished, there's nowhere to hide.", budget:-30,schedule:-10,team:0,sponsor:-20},
+        ]
+      },
+      {
+        phase:"Closing",
+        title:"The Final Push",
+        situation:"Year 19. You're one year ahead of schedule on the main structure, but the casing stones — the beautiful white limestone that will make the pyramid gleam — are three months behind. Rush them (risk cracks) or delay the ceremony?",
+        flavour:"The whole of Egypt is watching. Literally.",
+        choices:[
+          {text:"Rush the casing stones. Hit the deadline.", outcome:"neutral", title:"Done on Time", explanation:"A few casing stones crack. Most Egyptians can't tell. Khufu declares it magnificent anyway. History agrees.", budget:-5,schedule:15,team:-5,sponsor:10},
+          {text:"Delay three months. Do it right.", outcome:"good", title:"Quality Above All", explanation:"The three-month delay is worth it. The pyramid gleams perfectly in the sun. Khufu weeps with joy. You survive.", budget:0,schedule:-5,team:5,sponsor:20},
+          {text:"Ask the team to work nights. All hands.", outcome:"bad", title:"Exhausted Finish", explanation:"The team is broken by the final sprint. Errors multiply. A section of casing stone is laid at the wrong angle. It takes four months to fix.", budget:-10,schedule:-10,team:-20,sponsor:-5},
+        ]
+      }
+    ]
+  },
+
+  {
+    id:"sistine",
+    emoji:"🎨",
+    name:"Sistine Chapel",
+    era:"1508 CE · Vatican",
+    diff:"★★☆☆☆",
+    color:"#7a4f2a",
+    intro:"You are Michelangelo. Sort of. You've been tasked with painting the Sistine Chapel ceiling. You wanted to sculpt. The Pope doesn't care. He's got a very specific vision... and you have a completely different one.",
+    scenes:[
+      {
+        phase:"Initiation",
+        title:"The Pope Has a Brief",
+        situation:"Pope Julius II summons you. 'Paint the twelve apostles on the ceiling. Simple. Elegant. Done by 1511.' You look up at the ceiling. Your mind is already exploding with ideas for something FAR more ambitious. Do you stick to scope?",
+        flavour:"The Pope taps his foot. He is famously short on patience and long on opinions.",
+        choices:[
+          {text:"Agree to 12 apostles. Deliver exactly what's asked.", outcome:"neutral", title:"Safe Scope", explanation:"The Pope is satisfied. The project is manageable. It will also be remembered as a pleasant but unremarkable ceiling. History will not make films about it.", budget:10,schedule:10,team:5,sponsor:10},
+          {text:"Propose the full vision: 300 figures, Genesis scenes, the works.", outcome:"good", title:"Visionary Scope Change!", explanation:"The Pope is startled, then intrigued, then enthusiastic. You've negotiated a bigger canvas — and a bigger budget. The greatest artwork in history begins.", budget:10,schedule:-15,team:0,sponsor:10},
+          {text:"Agree to 12 apostles and secretly plan something bigger.", outcome:"bad", title:"Scope Creep Disaster", explanation:"When the Pope sees what you're actually painting, he demands explanations. Trust is damaged and your budget is threatened.", budget:-15,schedule:-10,team:0,sponsor:-20},
+        ]
+      },
+      {
+        phase:"Planning",
+        title:"You Need a Team",
+        situation:"The ceiling is vast. Even Michelangelo can't do it alone (though he'll try). You can hire a team of skilled assistants from Florence, or go it alone and accept a much longer timeline.",
+        flavour:"Your back already aches from looking up at the ceiling.",
+        choices:[
+          {text:"Hire a full team of Florentine assistants.", outcome:"good", title:"Team Player", explanation:"The assistants accelerate the work enormously. You direct, they execute. The ceiling gets done faster and your neck recovers.", budget:-15,schedule:20,team:20,sponsor:5},
+          {text:"Work alone. No one else can match your standard.", outcome:"bad", title:"One-Man Band", explanation:"You paint for three years lying on your back. Your health deteriorates. The schedule slips badly. The Pope is NOT amused.", budget:5,schedule:-25,team:-10,sponsor:-15},
+          {text:"Hire one trusted assistant and teach as you go.", outcome:"neutral", title:"Selective Team", explanation:"Progress is moderate but quality is immaculate. The Pope checks in and is reasonably satisfied.", budget:-5,schedule:5,team:10,sponsor:5},
+        ]
+      },
+      {
+        phase:"Execution",
+        title:"Julius Turns Up Unannounced",
+        situation:"The Pope climbs the scaffolding — unannounced — to inspect progress. 'When will it be finished?' You're only 40% done. You have two options for your response.",
+        flavour:"Julius II is standing on your scaffolding, in full papal robes, looking very impatient.",
+        choices:[
+          {text:"'When it is done, Holy Father. Great art cannot be rushed.'", outcome:"neutral", title:"Artistic Integrity", explanation:"The Pope leaves muttering darkly but oddly respectful. He lets you work. For now.", budget:0,schedule:0,team:5,sponsor:-5},
+          {text:"Give a revised date with a proper progress update.", outcome:"good", title:"Professional Communication", explanation:"The Pope is impressed by your clarity. He approves additional funding to help you hit the new date. You've invented the status report in 1510.", budget:15,schedule:10,team:0,sponsor:15},
+          {text:"Panic and give an unrealistically early finish date.", outcome:"bad", title:"Over-Promise Again", explanation:"You promise completion in six months. It takes eighteen. The Pope is still talking about it at dinner parties.", budget:0,schedule:-15,team:0,sponsor:-20},
+        ]
+      },
+      {
+        phase:"Execution",
+        title:"The Plaster Crisis",
+        situation:"The original plaster mix is growing mould. Everything painted so far is at risk. Your plasterer says you need a new formula — but it will require repainting several sections. Cost and time blow out.",
+        flavour:"You stare at the mouldy angels. They stare back.",
+        choices:[
+          {text:"Repaint everything with the new formula. Do it right.", outcome:"good", title:"Quality First", explanation:"The delay hurts but the new plaster lasts 500+ years. Still going strong as of 2025.", budget:-20,schedule:-10,team:-5,sponsor:-5},
+          {text:"Paint over the mould. Nobody will notice from down there.", outcome:"bad", title:"Cover-Up Catastrophe", explanation:"The mould spreads. Six months later the entire section has to be stripped and repainted. Twice as long, twice the cost.", budget:-30,schedule:-25,team:-10,sponsor:-20},
+          {text:"Patch the worst areas and monitor closely.", outcome:"neutral", title:"Risk Accepted", explanation:"It's not perfect but it holds for now. You've kicked a risk down the road — but at least the project moves.", budget:-8,schedule:0,team:0,sponsor:0},
+        ]
+      },
+      {
+        phase:"Closing",
+        title:"The Pope Wants to Open Early",
+        situation:"The ceiling is 90% done. Julius is dying (genuinely) and desperately wants to see the finished ceiling before he goes. He wants to open the chapel next month. You need three more months for the final sections.",
+        flavour:"The Pope looks genuinely frail. Also furious.",
+        choices:[
+          {text:"Open it now. Give the dying Pope his moment.", outcome:"good", title:"Human Decision", explanation:"Julius sees his chapel and weeps. He dies six months later. The final sections are finished quietly. History calls it perfect.", budget:0,schedule:-5,team:5,sponsor:25},
+          {text:"Refuse. Artistic integrity demands completion.", outcome:"bad", title:"Missed the Moment", explanation:"Julius dies before seeing the finished work. His successor is not impressed by your principled stand and cuts your fee.", budget:-15,schedule:5,team:0,sponsor:-25},
+          {text:"Open the completed sections with scaffolding visible.", outcome:"neutral", title:"Partial Opening", explanation:"A compromise. Julius sees most of the work and is moved. You finish the rest in peace.", budget:0,schedule:0,team:5,sponsor:10},
+        ]
+      }
+    ]
+  },
+
+  {
+    id:"apollo",
+    emoji:"🚀",
+    name:"Apollo 11",
+    era:"1961–1969 · NASA",
+    diff:"★★★★☆",
+    color:"#1a6b6b",
+    intro:"President Kennedy has just told 300 million people you're going to the moon by 1969. Nobody has ever been to the moon. You have eight years, a blank sheet of paper, and the entire Cold War riding on your shoulders.",
+    scenes:[
+      {
+        phase:"Initiation",
+        title:"We Choose to Go to the Moon",
+        situation:"It's 1961. Kennedy has made his speech. Your boss walks in: 'Congratulations, you're managing the moon programme.' You have no spacecraft, no rocket big enough, and no idea how to land on the moon. Where do you start?",
+        flavour:"A poster of the moon hangs on the wall. It looks very far away.",
+        choices:[
+          {text:"Plan everything in detail before building anything.", outcome:"neutral", title:"Plan First", explanation:"Solid foundation but you've burned 18 months in meetings. The Russians launched another satellite while you were planning.", budget:-5,schedule:-10,team:5,sponsor:-5},
+          {text:"Run three parallel development tracks simultaneously.", outcome:"good", title:"Parallel Tracks!", explanation:"Bold and expensive, but you're learning three times as fast. NASA would later call this approach 'all-up testing' and it transforms the programme.", budget:-15,schedule:20,team:10,sponsor:15},
+          {text:"Start with the rocket. Everything follows from that.", outcome:"neutral", title:"Rocket First", explanation:"Saturn V development begins. Sensible priority but other teams are waiting on its specs — creating dependencies that slow them down.", budget:0,schedule:5,team:-5,sponsor:5},
+        ]
+      },
+      {
+        phase:"Planning",
+        title:"Earth Orbit vs. Lunar Orbit Rendezvous",
+        situation:"Your engineers are split on approach. Option A: assemble the spacecraft in Earth orbit (safe but requires dozens of launches). Option B: fly directly to the moon with one rocket. Option C: land a module from lunar orbit — complex, but one rocket. The debate is getting heated.",
+        flavour:"The whiteboard is covered in equations. Three engineers are not speaking to each other.",
+        choices:[
+          {text:"Earth orbit rendezvous. Proven approach, minimal risk.", outcome:"neutral", title:"Safe Route", explanation:"Safe but requires massive infrastructure. The timeline gets very tight. Kennedy's 1969 deadline looks wobbly.", budget:-10,schedule:-10,team:5,sponsor:0},
+          {text:"Lunar orbit rendezvous. Back John Houbolt's controversial idea.", outcome:"good", title:"Brilliant Call!", explanation:"John Houbolt's method is lighter, cheaper, and faster. You back a junior engineer over senior opposition. It works. This is the approach NASA uses.", budget:15,schedule:15,team:5,sponsor:15},
+          {text:"Let the engineers debate until consensus.", outcome:"bad", title:"Analysis Paralysis", explanation:"The debate lasts 8 months. The Russians land an unmanned probe on the moon while you're still arguing. Kennedy calls to express his feelings.", budget:0,schedule:-20,team:-10,sponsor:-20},
+        ]
+      },
+      {
+        phase:"Execution",
+        title:"Apollo 1 Fire",
+        situation:"January 1967. A fire in the Apollo 1 capsule during a ground test kills three astronauts. The programme is in crisis. Congress is threatening to cancel everything. You must decide how to respond.",
+        flavour:"The launch pad is silent. The whole of NASA is silent.",
+        choices:[
+          {text:"Full stop. Redesign everything. Safety above all.", outcome:"good", title:"Right Call", explanation:"Eighteen months of redesign. 1,400 changes to the capsule. The programme that comes back is fundamentally safer. Apollo 11 lands safely because of this decision.", budget:-20,schedule:-15,team:5,sponsor:5},
+          {text:"Minor fixes and press on. We can't afford the delay.", outcome:"bad", title:"Catastrophic Pressure", explanation:"Another incident six months later forces a complete stop anyway — plus a Congressional inquiry. The delay is twice as long as the original option.", budget:-30,schedule:-30,team:-20,sponsor:-25},
+          {text:"Redesign only the fire risk areas. Partial fix.", outcome:"neutral", title:"Risk Tradeoff", explanation:"You address the immediate cause but miss some systemic issues. The programme continues with elevated risk. It works out — barely.", budget:-10,schedule:-10,team:0,sponsor:0},
+        ]
+      },
+      {
+        phase:"Execution",
+        title:"The Software Crisis",
+        situation:"It's 1968. Your software lead, Margaret Hamilton, warns that the navigation computer software is not ready for a lunar landing attempt. Her team needs three more months. Mission Control wants to launch on schedule.",
+        flavour:"Margaret Hamilton stands in front of a stack of code printouts taller than she is. 'It's not ready,' she says.",
+        choices:[
+          {text:"Trust Hamilton. Delay for the software fix.", outcome:"good", title:"Trust the Expert", explanation:"The three months are used brilliantly. Hamilton's team builds in an error-recovery system that literally saves Apollo 11 when alarms fire during final descent.", budget:-5,schedule:-10,team:15,sponsor:-5},
+          {text:"Launch anyway. Astronauts can handle issues in flight.", outcome:"bad", title:"Critical Miss", explanation:"During lunar descent, a software overload triggers abort conditions. The landing is called off. Armstrong and Aldrin return safely — but you don't go to the moon in 1969.", budget:0,schedule:-30,team:-15,sponsor:-20},
+          {text:"Launch but limit the mission — no landing attempt.", outcome:"neutral", title:"Reduced Scope", explanation:"You orbit the moon and return. Valuable data, no risk. Kennedy's deadline is technically met but nobody's walking on the moon yet.", budget:5,schedule:5,team:5,sponsor:-10},
+        ]
+      },
+      {
+        phase:"Closing",
+        title:"11 Minutes of Terror",
+        situation:"July 20, 1969. Armstrong and Aldrin are 200 metres above the lunar surface when the landing computer fires 1202 alarms. The team has 90 seconds to decide: abort or continue?",
+        flavour:"Every person at Mission Control is holding their breath.",
+        choices:[
+          {text:"Abort. Safety first, always.", outcome:"neutral", title:"Safe Return", explanation:"Armstrong and Aldrin return safely. Another mission is planned. The 1202 alarm was actually harmless — the computer was telling you it was overloaded but managing fine.", budget:5,schedule:-20,team:5,sponsor:-10},
+          {text:"Go! Mission Control calls 'GO' — trust the team.", outcome:"good", title:"The Eagle Has Landed!", explanation:"'Houston, Tranquility Base here. The Eagle has landed.' You deliver the greatest project management achievement in human history. On time. Under budget. On the Moon.", budget:10,schedule:15,team:25,sponsor:25},
+          {text:"Ask for more data before deciding.", outcome:"bad", title:"Hesitation", explanation:"The 90-second window closes. The abort is automatic. The most important 90 seconds in project history, and you asked for a meeting.", budget:0,schedule:-15,team:-10,sponsor:-15},
+        ]
+      }
+    ]
+  },
+
+  {
+    id:"channel",
+    emoji:"🚇",
+    name:"The Channel Tunnel",
+    era:"1988–1994 · England/France",
+    diff:"★★★★★",
+    color:"#3d4f5c",
+    intro:"You're managing the most ambitious civil engineering project in European history: a tunnel under the English Channel connecting Britain to France. Two teams. Two languages. Two sets of regulations. One terrifying budget.",
+    scenes:[
+      {
+        phase:"Initiation",
+        title:"Two Clients. Zero Agreement.",
+        situation:"Your first meeting has both the British and French project owners in the room. They disagree on: the contract structure, the engineering standards, the currency for billing, and the colour of the hard hats. This is going to be a long project.",
+        flavour:"The English and French project directors are staring at each other across the table.",
+        choices:[
+          {text:"Force a decision today. One set of standards, British version.", outcome:"bad", title:"Cultural Disaster", explanation:"The French team walks out. You spend three months rebuilding the relationship. The British standards have to be renegotiated anyway.", budget:-15,schedule:-20,team:-15,sponsor:-20},
+          {text:"Create a joint governance committee with agreed decision rules.", outcome:"good", title:"Smart Governance", explanation:"Brilliant. The committee is slow but fair. Both sides feel heard. The governance structure becomes a model for international megaprojects.", budget:-5,schedule:-5,team:10,sponsor:15},
+          {text:"Let each side manage their own half independently.", outcome:"neutral", title:"Parallel Management", explanation:"Works until the two tunnels need to meet in the middle. Coordination issues start emerging at the interface.", budget:0,schedule:0,team:0,sponsor:0},
+        ]
+      },
+      {
+        phase:"Planning",
+        title:"The Budget Estimate Problem",
+        situation:"Your cost estimators give you a range: optimistic £3bn, realistic £5bn, worst-case £9bn. The investors want a number to pitch to the market. What do you tell them?",
+        flavour:"Your chief estimator is sweating. 'The ground conditions are... variable,' he says.",
+        choices:[
+          {text:"Tell them £3bn. Win the funding, worry later.", outcome:"bad", title:"Optimism Bias", explanation:"The actual cost ends up being £9bn. The project nearly goes bankrupt twice. You've just recreated the real Channel Tunnel's actual budget disaster. Congratulations.", budget:-30,schedule:-10,team:-5,sponsor:-25},
+          {text:"Tell them £5bn with a documented risk range.", outcome:"good", title:"Honest Estimate", explanation:"Investors are nervous but informed. When costs rise, you can point to the documented risk range. Trust — and the project — survives.", budget:10,schedule:5,team:5,sponsor:10},
+          {text:"Tell them £4bn. Aggressive but credible.", outcome:"neutral", title:"Squeezed Estimate", explanation:"Technically feasible in theory, very wrong in practice. Cost pressures build throughout the project. Corners get cut.", budget:-10,schedule:0,team:0,sponsor:-5},
+        ]
+      },
+      {
+        phase:"Execution",
+        title:"The Boring Machines Won't Stop",
+        situation:"Your tunnel boring machines (TBMs) are incredibly expensive to stop and restart. The French team wants to keep boring through a geological anomaly that your risk manager flagged as potentially unstable. Stopping costs £2M. Continuing risks collapse.",
+        flavour:"The TBM hums. The ground groans.",
+        choices:[
+          {text:"Stop and investigate. Safety first.", outcome:"good", title:"Risk Managed", explanation:"The geological survey finds a fault line. You reroute. It costs £2M and three weeks but saves an estimated £200M in remediation — and possibly lives.", budget:-8,schedule:-10,team:5,sponsor:5},
+          {text:"The schedule can't absorb a stop. Keep boring.", outcome:"bad", title:"Ground Collapse!", explanation:"The anomaly is worse than feared. A partial collapse requires emergency stabilisation — eight weeks of work and £45M in unplanned costs.", budget:-35,schedule:-30,team:-10,sponsor:-20},
+          {text:"Bore slowly through the zone and monitor constantly.", outcome:"neutral", title:"Cautious Progress", explanation:"You navigate the zone carefully over two extra weeks. No collapse, minor delay. A reasonable risk call.", budget:-5,schedule:-8,team:0,sponsor:0},
+        ]
+      },
+      {
+        phase:"Execution",
+        title:"The Meeting in the Middle",
+        situation:"The British and French tunnels are about to meet. Your survey teams disagree by 350mm on the exact meeting point coordinates. One of you is wrong. Who calls it?",
+        flavour:"Deep under the English Channel, two teams are approaching each other in the dark.",
+        choices:[
+          {text:"Independent survey. Get a third party to verify.", outcome:"good", title:"Third Party Verification", explanation:"The independent survey confirms the French coordinates. The British team adjusts with good grace. The tunnels meet perfectly — one of the greatest engineering achievements of the century.", budget:-3,schedule:-3,team:5,sponsor:10},
+          {text:"Go with British coordinates. We're more reliable.", outcome:"bad", title:"Diplomatic Crisis", explanation:"The French coordinates were right. The misalignment requires an embarrassing and expensive widening section at the junction point.", budget:-20,schedule:-15,team:-15,sponsor:-15},
+          {text:"Average the two. Split the difference.", outcome:"neutral", title:"Compromise Solution", explanation:"The junction needs minor adjustment work. Not elegant but both teams can claim credit.", budget:-8,schedule:-5,team:5,sponsor:0},
+        ]
+      },
+      {
+        phase:"Closing",
+        title:"The First Train",
+        situation:"The tunnel is complete. But safety tests have found 47 minor defects. The transport authorities say all must be fixed before opening. The press is waiting for a launch date. Investors need revenue.",
+        flavour:"Hundreds of journalists are camped outside. A French train sits at one end. A British one at the other.",
+        choices:[
+          {text:"Fix all 47 defects. Open when it's right.", outcome:"good", title:"Safe Opening", explanation:"Three more weeks of work. The opening ceremony is perfect. No incidents. The Channel Tunnel operates safely for the next 30 years. Worth every day.", budget:-5,schedule:-10,team:5,sponsor:10},
+          {text:"Open now. Fix defects under live operation.", outcome:"bad", title:"Rushed Opening", explanation:"A minor defect causes a power failure on the second passenger service. The press has a field day. Investor confidence collapses temporarily.", budget:-15,schedule:10,team:-5,sponsor:-20},
+          {text:"Fix critical defects only. Open with known minor issues.", outcome:"neutral", title:"Calculated Risk", explanation:"Opens on time. No incidents from the minor defects. You got lucky. The PM community debates this decision for years.", budget:-3,schedule:5,team:0,sponsor:5},
+        ]
+      }
+    ]
+  },
+  {
+    id:"greatwall",
+    emoji:"🏰",
+    name:"The Great Wall of China",
+    era:"221 BCE – 1644 CE · China",
+    diff:"★★★★☆",
+    color:"#8b1a1a",
+    intro:"Emperor Qin Shi Huang wants a wall. Not a fence. Not a barrier. A WALL — stretching thousands of miles across the northern frontier to keep out the Xiongnu. You have hundreds of thousands of workers, a brutal deadline, and an emperor who invented the concept of 'zero tolerance for failure.'",
+    scenes:[
+      {
+        phase:"Initiation",
+        title:"The Emperor's Command",
+        situation:"Emperor Qin Shi Huang slams his fist on the table. 'Connect the existing walls. Extend them. Make them one. The northern border must be sealed within ten years.' Your generals estimate it will take 30 years minimum. What do you tell him?",
+        flavour:"The emperor's eyes are not the eyes of a man who accepts bad news gracefully.",
+        choices:[
+          {text:"'Ten years, Your Majesty. We will deliver.' Then figure it out.", outcome:"bad", title:"Impossible Promise", explanation:"The ten-year target means cutting corners everywhere. Sections collapse. Workers die in extraordinary numbers. The emperor's subsequent fury makes the original deadline seem mild.", budget:-20,schedule:-25,team:-20,sponsor:-10},
+          {text:"Present a phased plan: critical sections in 10 years, full wall in 25.", outcome:"good", title:"Phased Delivery!", explanation:"The Emperor grudgingly approves. Phased delivery means you can show progress while managing reality. The critical northern passes are fortified first — exactly where they're needed most.", budget:5,schedule:15,team:10,sponsor:10},
+          {text:"'It will be done when it is done, Emperor.' State the truth.", outcome:"neutral", title:"Brave Honesty", explanation:"Remarkably, the emperor respects directness. He gives you more resources but watches you very, very closely. Every month.", budget:10,schedule:5,team:5,sponsor:-5},
+        ]
+      },
+      {
+        phase:"Planning",
+        title:"The Labour Force Problem",
+        situation:"You need 500,000 workers. The generals suggest three sources: conscripted soldiers (disciplined but needed for defence), convicted criminals (motivated to finish quickly and go home), and peasant farmers (available but harvest season conflicts). You need all three — but in what ratio?",
+        flavour:"The northern wind howls. It is very cold. The wall is going to be very long.",
+        choices:[
+          {text:"Mostly soldiers — military discipline guarantees quality.", outcome:"neutral", title:"Military Workforce", explanation:"Quality is excellent but you've thinned the border defences. Three Xiongnu raids happen while your soldiers are laying stones. The Emperor is not pleased.", budget:0,schedule:5,team:5,sponsor:-10},
+          {text:"Mixed workforce — balance discipline, motivation, and availability.", outcome:"good", title:"Workforce Balance", explanation:"Brilliant resource planning. Each group works their strength: soldiers on complex sections, criminals on straight runs, farmers in short seasonal bursts. Productivity is remarkable.", budget:5,schedule:10,team:15,sponsor:10},
+          {text:"Mostly peasant farmers — cheapest option.", outcome:"bad", title:"Harvest Conflict", explanation:"Half your workforce disappears during planting and harvest season. Progress grinds to a halt twice a year. The wall sections look... inconsistent.", budget:10,schedule:-20,team:-10,sponsor:-15},
+        ]
+      },
+      {
+        phase:"Execution",
+        title:"The Terrain is Impossible",
+        situation:"Section 7 reaches a mountain range that your original survey missed. Building over it adds 200km and enormous cost. Building around it leaves a gap — a potential invasion corridor. Your engineers propose a third option: watchtowers on the peaks linked with a shorter wall section.",
+        flavour:"The mountains loom ahead. Your survey team looks embarrassed.",
+        choices:[
+          {text:"Build over the mountains. No gap in the wall.", outcome:"neutral", title:"No Compromises", explanation:"Heroic engineering. The mountain section takes three times as long and costs five times as much. But there is definitely no gap.", budget:-20,schedule:-15,team:-10,sponsor:5},
+          {text:"Build around it. Speed over completeness.", outcome:"bad", title:"Gap in the Defences", explanation:"Three years later, the Xiongnu find the gap immediately. An emergency wall section has to be built anyway — at double the cost.", budget:-25,schedule:-20,team:0,sponsor:-20},
+          {text:"Watchtowers on peaks, shorter connecting wall. Innovative solution.", outcome:"good", title:"Creative Engineering!", explanation:"The watchtower network provides better visibility than a continuous wall. Signal fires alert defenders 500km away in hours. You've invented the first early warning system.", budget:10,schedule:10,team:10,sponsor:15},
+        ]
+      },
+      {
+        phase:"Execution",
+        title:"Workers Are Dying",
+        situation:"The mortality rate is horrifying — cold, exhaustion, accidents, and disease. Productivity is collapsing as morale crumbles. Your foreman suggests better food rations and shelter. The quartermaster says there's no budget.",
+        flavour:"A messenger arrives with another mortality report. You stop reading after the first line.",
+        choices:[
+          {text:"Find the budget for better rations and shelter. People first.", outcome:"good", title:"Humane Management", explanation:"Mortality drops dramatically. Productivity recovers. Workers begin to take pride in the wall — they're building something that will last forever. And they'd like to live to see it.", budget:-15,schedule:10,team:25,sponsor:5},
+          {text:"Push on. The wall must be built. History demands it.", outcome:"bad", title:"Human Cost", explanation:"The wall advances but the human cost becomes a national scandal. Three provinces refuse to send more workers. The project stalls for two years.", budget:0,schedule:-20,team:-25,sponsor:-10},
+          {text:"Improve shelter but keep rations the same. Split the difference.", outcome:"neutral", title:"Partial Improvement", explanation:"Deaths reduce somewhat. Morale improves modestly. Progress continues at a reduced but sustainable pace.", budget:-8,schedule:5,team:10,sponsor:0},
+        ]
+      },
+      {
+        phase:"Closing",
+        title:"The Imperial Inspection",
+        situation:"The Emperor is coming to inspect. Your quality control team flags that 15% of the eastern sections were built with substandard mortar — lasting 50 years, not 500. Do you tell him before he arrives?",
+        flavour:"The Imperial procession is three days away. The eastern sections are suspiciously smooth.",
+        choices:[
+          {text:"Tell him everything. Propose a remediation plan.", outcome:"good", title:"Radical Transparency", explanation:"The Emperor is furious but respects the honesty. He approves emergency remediation funding. The sections are rebuilt properly. The wall still stands 2,000 years later.", budget:-15,schedule:-10,team:5,sponsor:10},
+          {text:"Say nothing. Hope he doesn't notice.", outcome:"bad", title:"Cover Up Discovered", explanation:"The Emperor notices. He notices everything. The consequences for the project team are severe.", budget:-5,schedule:0,team:-15,sponsor:-30},
+          {text:"Quietly begin remediation without telling him.", outcome:"neutral", title:"Silent Fix", explanation:"You get halfway through repairs before the Imperial procession arrives. The Emperor sees workers on the wall and asks why. Your explanation is... creative.", budget:-10,schedule:-5,team:0,sponsor:-5},
+        ]
+      }
+    ]
+  },
+  {
+    id:"eiffel",
+    emoji:"🗼",
+    name:"The Eiffel Tower",
+    era:"1887–1889 · Paris, France",
+    diff:"★★☆☆☆",
+    color:"#4a5e3a",
+    intro:"It's 1887. Gustave Eiffel has won the contract to build the centrepiece of the 1889 World Fair. The deadline is absolute — the World Fair opens May 6th, 1889 whether the tower is ready or not. Also, most of Paris thinks it's hideous and wants it torn down immediately.",
+    scenes:[
+      {
+        phase:"Initiation",
+        title:"The City Hates Your Tower",
+        situation:"Three hundred Parisian artists and intellectuals — including Guy de Maupassant — have signed a petition calling the proposed tower a 'metal asparagus' and a 'tragic street lamp.' The City of Paris is reconsidering the contract. Do you fight back or stay quiet?",
+        flavour:"The petition is printed in Le Temps. It is not flattering.",
+        choices:[
+          {text:"Ignore it. The contract is signed. Build it anyway.", outcome:"neutral", title:"Head Down", explanation:"The controversy simmers but Eiffel pushes on. The public opposition inadvertently creates enormous anticipation for the finished tower.", budget:0,schedule:5,team:0,sponsor:-5},
+          {text:"Write a passionate public defence of the tower's innovation.", outcome:"good", title:"PR Masterclass!", explanation:"Eiffel's open letter in Le Temps reframes the tower as a triumph of French engineering genius. Public opinion begins to shift. Several petition signatories quietly withdraw.", budget:0,schedule:0,team:5,sponsor:15},
+          {text:"Offer to change the design to please the critics.", outcome:"bad", title:"Scope Chaos", explanation:"Redesigning elements mid-contract costs a month and considerable money. The new elements are no better received.", budget:-15,schedule:-15,team:-5,sponsor:-10},
+        ]
+      },
+      {
+        phase:"Planning",
+        title:"The Prefabrication Gamble",
+        situation:"Eiffel's chief engineer proposes prefabricating every single component in the factory — 18,000 pieces, each drilled to 1/10mm precision. Never done at this scale. Faster on site, but a manufacturing mistake discovered late could be catastrophic.",
+        flavour:"The factory floor hums. Koechlin is confident. You are cautiously terrified.",
+        choices:[
+          {text:"Full prefabrication. Trust the precision engineering.", outcome:"good", title:"Engineering Genius!", explanation:"On-site assembly takes just 26 months with only 300 workers. The prefabrication approach revolutionises construction forever.", budget:10,schedule:20,team:10,sponsor:15},
+          {text:"Hybrid — prefabricate simple sections, fabricate complex ones on site.", outcome:"neutral", title:"Cautious Hybrid", explanation:"Slower than full prefabrication but manageable. You finish on time but only just.", budget:-5,schedule:5,team:5,sponsor:5},
+          {text:"Traditional on-site construction. Proven and safe.", outcome:"bad", title:"Timeline Disaster", explanation:"Traditional construction at this scale and height is brutally slow. By month 12 you're 30% behind schedule.", budget:0,schedule:-20,team:-5,sponsor:-15},
+        ]
+      },
+      {
+        phase:"Execution",
+        title:"The Workers Strike",
+        situation:"Workers on sections above 300 metres demand double pay for the height. It's January 1888. You're on schedule, but a strike now could destroy the World Fair deadline.",
+        flavour:"The workers look down at Paris from 300 metres. Paris looks very small. Their demands seem reasonable.",
+        choices:[
+          {text:"Pay the hazard rate. People working at those heights deserve it.", outcome:"good", title:"Fair Pay, Fast Finish", explanation:"Workers feel respected. Productivity at height actually increases. Zero serious accidents. The upper sections go up faster than any comparable project.", budget:-10,schedule:10,team:20,sponsor:5},
+          {text:"Refuse. The contract rate is the contract rate.", outcome:"bad", title:"Strike!", explanation:"Workers down tools for three weeks. You lose a month of the most critical schedule period. The World Fair deadline is now extremely tight.", budget:5,schedule:-20,team:-20,sponsor:-15},
+          {text:"Negotiate a smaller increase. Find a compromise.", outcome:"neutral", title:"Negotiated Settlement", explanation:"Workers accept a modest increase. Some grumbling continues but productivity stays acceptable.", budget:-5,schedule:5,team:8,sponsor:0},
+        ]
+      },
+      {
+        phase:"Execution",
+        title:"The Lifts Crisis",
+        situation:"The American lift company announces a six-month delay. The tower without working lifts is useless for the World Fair. You have three months to opening.",
+        flavour:"Eiffel reads the telegram twice. Then a third time. The words do not improve.",
+        choices:[
+          {text:"Sue the American company and find a French alternative immediately.", outcome:"good", title:"Rapid Pivot!", explanation:"A French-designed lift solution delivers in 10 weeks. The tower opens with functional lifts and a great story about French engineering independence.", budget:-10,schedule:5,team:5,sponsor:10},
+          {text:"Open the tower without lifts. Stairs only.", outcome:"bad", title:"Nobody Climbs Stairs", explanation:"Visitor numbers are catastrophically low. The press calls it 'the tower nobody can visit.' Eiffel's investment model depends on visitor revenue.", budget:-20,schedule:5,team:0,sponsor:-20},
+          {text:"Delay the tower opening by six months. Do it right.", outcome:"neutral", title:"Missed the Fair", explanation:"The lifts are perfect. The tower is magnificent. But the World Fair is over, and the tower missed its entire commercial launch window.", budget:0,schedule:-20,team:5,sponsor:-10},
+        ]
+      },
+      {
+        phase:"Closing",
+        title:"The Opening Ceremony",
+        situation:"May 6th, 1889. The tower is complete — two days before the World Fair. Eiffel wants a grand ceremony. The government wants a quiet opening. Guy de Maupassant is eating in the tower restaurant daily because it's the only place in Paris you can't see it.",
+        flavour:"Paris has come around. Mostly. Maupassant is still in the restaurant.",
+        choices:[
+          {text:"Grand ceremony, invite the press, make it a spectacle.", outcome:"good", title:"Iconic Opening!", explanation:"The ceremony is magnificent. Within weeks, the tower that Paris hated becomes the most recognisable structure on Earth. Even the petition signatories are impressed.", budget:-5,schedule:0,team:5,sponsor:20},
+          {text:"Quiet government opening. Low key and dignified.", outcome:"neutral", title:"Dignified Completion", explanation:"The tower opens gracefully. The controversy fades. Eiffel's engineering achievement speaks for itself.", budget:0,schedule:0,team:0,sponsor:5},
+          {text:"Let Eiffel climb it alone and plant the French flag at the top.", outcome:"good", title:"Unforgettable Moment!", explanation:"The image of Eiffel at the summit with the tricolor becomes iconic. Every newspaper in the world runs it. The 'metal asparagus' becomes the symbol of France overnight.", budget:0,schedule:0,team:10,sponsor:20},
+        ]
+      }
+    ]
+  },
+  {
+    id:"brooklyn",
+    emoji:"🌉",
+    name:"The Brooklyn Bridge",
+    era:"1869–1883 · New York, USA",
+    diff:"★★★★☆",
+    color:"#2a4a7a",
+    intro:"1869. John Roebling has designed the longest suspension bridge in history. Then Roebling dies in a site accident before construction begins. His son Washington takes over. Then Washington is struck by caisson disease and can barely move. This is the world's most cursed megaproject.",
+    scenes:[
+      {
+        phase:"Initiation",
+        title:"The Chief Engineer is Dead",
+        situation:"John Roebling has died from tetanus after a surveying accident — before a single cable is strung. His son Washington Roebling takes over but has never managed a project this size. The Bridge Company board is panicking.",
+        flavour:"The East River rushes past. Brooklyn waits. Manhattan waits. Everyone is waiting.",
+        choices:[
+          {text:"Announce Washington Roebling as the new chief and push forward immediately.", outcome:"good", title:"Decisive Leadership", explanation:"Washington proves brilliantly capable. His deep knowledge of his father's designs means no momentum is lost. The board is reassured by his confidence.", budget:5,schedule:10,team:10,sponsor:10},
+          {text:"Bring in an external engineer to lead. Washington assists.", outcome:"bad", title:"Knowledge Lost", explanation:"The external engineer doesn't understand the Roebling design philosophy. Significant rework is needed when incompatibilities are discovered. Washington quits in frustration.", budget:-20,schedule:-20,team:-15,sponsor:-10},
+          {text:"Pause for six months to review the entire design.", outcome:"neutral", title:"Cautious Review", explanation:"The review finds no major flaws — the Roebling design is sound. Six months lost but the board is satisfied.", budget:-5,schedule:-15,team:0,sponsor:0},
+        ]
+      },
+      {
+        phase:"Planning",
+        title:"The Caisson Disease Crisis",
+        situation:"Workers in the pressurised underwater foundation chambers are getting 'caisson disease' — excruciating decompression sickness, paralysis, even death. Washington Roebling himself is struck down and confined to his bed.",
+        flavour:"Washington lies paralysed in his apartment overlooking the bridge site. His wife Emily looks out the window at the caissons.",
+        choices:[
+          {text:"Slow decompression protocols. Safer ascent times for all workers.", outcome:"good", title:"Safety First", explanation:"Illness rates drop significantly. Washington manages the project through Emily — arguably the world's first remote project management.", budget:-5,schedule:-10,team:20,sponsor:5},
+          {text:"Push on at current pace. The deadline cannot slip.", outcome:"bad", title:"Humanitarian Crisis", explanation:"Twenty-seven workers die. Congressional hearings are called. The project is nearly shut down entirely by public outrage.", budget:-10,schedule:-25,team:-25,sponsor:-20},
+          {text:"Replace the sickest workers and continue with shorter shifts.", outcome:"neutral", title:"Partial Mitigation", explanation:"Illness rates reduce somewhat. Progress continues but the human cost is still higher than it should be.", budget:-5,schedule:0,team:-5,sponsor:0},
+        ]
+      },
+      {
+        phase:"Execution",
+        title:"The Wire Fraud",
+        situation:"Your wire supplier has been substituting substandard wire for the bridge cables. An inspector discovers it after 5.7 million metres are already installed — 30% weaker than spec. The bridge won't fall, but it isn't safe at full capacity.",
+        flavour:"Washington Roebling reads the inspector's report from his sickbed. His expression is unreadable.",
+        choices:[
+          {text:"Tear out all substandard wire and replace it.", outcome:"neutral", title:"Full Remediation", explanation:"The bridge is rebuilt to spec. Haigh is prosecuted. Washington designs additional redundancy — the bridge ends up stronger than originally planned.", budget:-30,schedule:-20,team:-5,sponsor:-5},
+          {text:"Full structural analysis — if safe, add extra cables.", outcome:"good", title:"Engineering Solution", explanation:"The bridge has a 6x safety factor even with substandard wire. Extra cables bring it to 9x. A brilliant salvage of a terrible situation.", budget:-10,schedule:-5,team:5,sponsor:10},
+          {text:"Keep it quiet. The bridge is structurally sound enough.", outcome:"bad", title:"Cover Up", explanation:"The fraud is discovered anyway — the supplier brags about it in a letter. The scandal nearly destroys the project and Washington's reputation.", budget:-5,schedule:-15,team:-10,sponsor:-25},
+        ]
+      },
+      {
+        phase:"Execution",
+        title:"Emily Roebling Steps Up",
+        situation:"Washington is too ill to visit the site. Emily Roebling has been his communication link for years. Now the board wants to remove Washington as chief engineer. Emily wants to formally take over. It's 1882.",
+        flavour:"Emily Roebling stands before the Bridge Company board. She knows more about this bridge than any of them.",
+        choices:[
+          {text:"Support Emily's formal leadership. Recognise her capability.", outcome:"good", title:"Progressive Leadership!", explanation:"Emily becomes de facto chief engineer — managing contractors, politicians, and the board brilliantly. She is the first person to cross the bridge at opening.", budget:5,schedule:10,team:15,sponsor:10},
+          {text:"Keep Washington as nominal chief. Emily continues behind the scenes.", outcome:"neutral", title:"Shadow Leadership", explanation:"The arrangement works but Emily receives no credit for her extraordinary contribution. History takes 150 years to acknowledge who really ran it.", budget:0,schedule:5,team:5,sponsor:5},
+          {text:"Bring in a new chief engineer. Fresh start.", outcome:"bad", title:"Knowledge Vacuum", explanation:"The new engineer spends six months learning what Emily and Washington already knew. Costly delays. The board looks foolish.", budget:-15,schedule:-20,team:-10,sponsor:-15},
+        ]
+      },
+      {
+        phase:"Closing",
+        title:"Opening Day Panic",
+        situation:"May 24, 1883. An hour after the ceremony, someone shouts 'The bridge is falling!' A panic stampede kills 12 people. The bridge is perfectly safe — but the public doesn't know that.",
+        flavour:"The screams carry across the East River. Washington watches from his window.",
+        choices:[
+          {text:"Close the bridge immediately for a full safety inspection.", outcome:"neutral", title:"Caution Rules", explanation:"The inspection takes three days and confirms the bridge is perfectly safe. Public confidence is partially restored.", budget:-5,schedule:-10,team:0,sponsor:-5},
+          {text:"Issue a public statement from Washington Roebling confirming its safety.", outcome:"good", title:"Clear Communication", explanation:"P.T. Barnum marches 21 elephants across the bridge the following week to prove its strength. Public confidence is spectacularly restored.", budget:0,schedule:5,team:5,sponsor:15},
+          {text:"Invite engineers to publicly walk the bridge in numbers.", outcome:"good", title:"Confidence Campaign", explanation:"Dozens of engineers parade across the bridge. Within a week, New Yorkers are crossing in their thousands. The bridge's magnificence takes over.", budget:-5,schedule:0,team:5,sponsor:15},
+        ]
+      }
+    ]
+  },
+  {
+    id:"colosseum",
+    emoji:"🏟️",
+    name:"The Colosseum of Rome",
+    era:"72–80 CE · Rome",
+    diff:"★★★☆☆",
+    color:"#6b4f1a",
+    intro:"Emperor Vespasian has decided Rome needs the largest amphitheatre in the world — holding 80,000 spectators, with underground tunnels, retractable awnings, and a drainage system. You have 8 years. The opening games are already announced. The crowd is waiting.",
+    scenes:[
+      {
+        phase:"Initiation",
+        title:"Built on Nero's Lake",
+        situation:"The site is Nero's former private lake — now drained. The ground is waterlogged and unstable. Your chief engineer proposes a revolutionary concrete foundation system never used at this scale. It will work but adds six months to the schedule.",
+        flavour:"The site is muddy. Very muddy. You stand in it to your ankles.",
+        choices:[
+          {text:"Use the revolutionary foundation. Do it right from the start.", outcome:"good", title:"Engineering Excellence!", explanation:"The concrete foundation system is extraordinary. The Colosseum stands on it for 2,000 years. Six months well spent.", budget:-5,schedule:-10,team:5,sponsor:5},
+          {text:"Build on the existing ground. We don't have six months.", outcome:"bad", title:"Foundation Failure", explanation:"Three years in, the north-east section begins to sink. Emergency underpinning costs twice the original foundation investment and delays the opening by a year.", budget:-25,schedule:-20,team:-10,sponsor:-20},
+          {text:"Redesign the building to reduce the load on the weak sections.", outcome:"neutral", title:"Adaptive Design", explanation:"Smart engineering adapts the design to ground conditions. No delays, slightly reduced capacity. The Emperor approves but notes his specification hasn't been fully met.", budget:0,schedule:5,team:5,sponsor:-5},
+        ]
+      },
+      {
+        phase:"Planning",
+        title:"The Workforce Question",
+        situation:"Construction requires 100,000 workers. Options: prisoners from the Jewish War (free but resentful), paid Roman citizens (expensive but motivated), or a mix. Your finance minister says you can't afford full paid labour. Your HR advisor says forced labour produces poor quality.",
+        flavour:"The logistics of feeding 100,000 workers is itself a significant project.",
+        choices:[
+          {text:"Mixed workforce: skilled citizens paid, basic labour from prisoners.", outcome:"good", title:"Smart Segmentation", explanation:"Skilled Roman craftsmen produce immaculate stonework. Prisoners do the heavy lifting. Quality is high where it matters and cost is controlled.", budget:10,schedule:5,team:10,sponsor:10},
+          {text:"Mostly prisoner labour. The budget demands it.", outcome:"neutral", title:"Cost Over Quality", explanation:"Cost controlled but quality varies wildly. Some sections are magnificent; others need rework. The Emperor notices.", budget:15,schedule:0,team:-10,sponsor:-5},
+          {text:"All paid Roman labour. Quality above all.", outcome:"bad", title:"Budget Collapse", explanation:"The quality is breathtaking but the budget is exhausted by year four. Vespasian faces a funding crisis that nearly stops the project.", budget:-25,schedule:-5,team:10,sponsor:-15},
+        ]
+      },
+      {
+        phase:"Execution",
+        title:"The Awning System",
+        situation:"The design includes a velarium — a massive retractable canvas awning to shade spectators. Your sail-makers say it's never been done at this scale. The sailors who operate it need months of training. Vespasian wants it for opening day.",
+        flavour:"80,000 spectators in direct Roman summer sun is a significant stakeholder satisfaction risk.",
+        choices:[
+          {text:"Build it. Train 1,000 sailors to operate it. Rome deserves the best.", outcome:"good", title:"Engineering Marvel!", explanation:"The velarium is extraordinary — 100,000 square metres of canvas operated by a naval crew. Spectators are amazed and comfortable. One of the wonders of the ancient world.", budget:-15,schedule:-5,team:5,sponsor:20},
+          {text:"Drop it from scope. Can't risk a failure on opening day.", outcome:"neutral", title:"Scope Reduction", explanation:"The crowd is hot. Very hot. The games are magnificent but spectators in the upper tiers roast in the Roman sun. The Emperor notes the absence of the promised awning.", budget:10,schedule:10,team:0,sponsor:-10},
+          {text:"Install a fixed awning over the imperial sections only.", outcome:"neutral", title:"VIP Compromise", explanation:"The Emperor is comfortable. The other 79,500 spectators are not. But they don't write the history books.", budget:0,schedule:5,team:0,sponsor:5},
+        ]
+      },
+      {
+        phase:"Execution",
+        title:"Vespasian Dies",
+        situation:"Emperor Vespasian dies in 79 CE with the Colosseum 75% complete. His son Titus inherits the project — and immediately wants changes: larger arena, more underground chambers, different entrance configuration. It's a major scope change mid-build.",
+        flavour:"The new Emperor looks at the half-built Colosseum and sees something different from what his father saw.",
+        choices:[
+          {text:"Formal change request. Assess impact on cost and schedule first.", outcome:"good", title:"Change Control!", explanation:"You present Titus with a full impact assessment. He approves a budget increase. The changes are well-managed and the Colosseum that opens is better than the original design.", budget:15,schedule:-10,team:5,sponsor:15},
+          {text:"Implement everything Titus wants immediately. He's the Emperor.", outcome:"bad", title:"Uncontrolled Change", explanation:"Uncoordinated changes create structural conflicts in already-built sections. Rework is expensive and chaotic. Titus blames the project team for the confusion he created.", budget:-20,schedule:-20,team:-10,sponsor:-10},
+          {text:"Implement small changes, push back on structural ones.", outcome:"neutral", title:"Selective Compliance", explanation:"A reasonable negotiation. Titus gets most of what he wants. You protect the structural integrity of existing work.", budget:-5,schedule:-5,team:5,sponsor:5},
+        ]
+      },
+      {
+        phase:"Closing",
+        title:"The Opening Games",
+        situation:"80 CE. The Colosseum is complete. Titus announces 100 days of opening games. He wants a mock naval battle on day one — flooding the arena. Your drainage engineer says the system needs 48 hours' preparation. Titus has already announced it in every city in the Empire.",
+        flavour:"Titus has announced the naval battle everywhere. The drainage engineer sweats.",
+        choices:[
+          {text:"Tell Titus the truth — 48 hours' preparation needed.", outcome:"good", title:"Honest Communication", explanation:"Titus adjusts the opening schedule. The naval battle is spectacular — 3,000 fighters on fully rigged warships inside the Colosseum. Absolutely worth the 48-hour wait.", budget:0,schedule:-3,team:5,sponsor:15},
+          {text:"Flood it now. The Emperor's schedule is the schedule.", outcome:"bad", title:"Drainage Disaster", explanation:"The underground chambers flood, damaging equipment for later events. Emergency repairs during the opening games are not a good look.", budget:-15,schedule:-10,team:-5,sponsor:-15},
+          {text:"Propose a modified partial flooding instead.", outcome:"neutral", title:"Creative Alternative", explanation:"A partial flooding creates a convincing spectacle. Most spectators can't tell the difference. Titus can, but the crowd's roar placates him.", budget:0,schedule:0,team:0,sponsor:5},
+        ]
+      }
+    ]
+  },
+  {
+    id:"panama",
+    emoji:"🌊",
+    name:"The Panama Canal",
+    era:"1881–1914 · Panama",
+    diff:"★★★★★",
+    color:"#1a5c3a",
+    intro:"Someone has the idea of connecting the Atlantic and Pacific Oceans by cutting through 80km of jungle, mountains, and disease-ridden swamp. The French tried first and failed — 22,000 dead. Now it's America's turn. You've inherited the world's most dangerous construction site and a deadline the US President personally announced.",
+    scenes:[
+      {
+        phase:"Initiation",
+        title:"The French Left a Mess",
+        situation:"The French attempt killed 22,000 workers and went spectacularly bankrupt. Your site is a rusting graveyard of abandoned equipment and overgrown excavations. The jungle is reclaiming everything. Where do you start?",
+        flavour:"Something screams in the distance. Probably a bird.",
+        choices:[
+          {text:"Start digging immediately. The canal won't build itself.", outcome:"bad", title:"Disease Catastrophe", explanation:"Without addressing disease first, your workforce begins dying at French rates. The project is suspended by Congress within six months.", budget:-20,schedule:-30,team:-30,sponsor:-25},
+          {text:"Stop everything. Eradicate malaria and yellow fever first.", outcome:"good", title:"Health First!", explanation:"Dr. William Gorgas spends 18 months eliminating mosquito breeding grounds. When construction resumes, the death rate drops 90%. This decision saves 36,000 lives and the project.", budget:-10,schedule:-10,team:20,sponsor:10},
+          {text:"Work in shifts — some crews dig, others manage disease control.", outcome:"neutral", title:"Parallel Approach", explanation:"Partially effective. Disease rates drop but not enough. Progress is made but Congress investigates the human cost.", budget:-5,schedule:-5,team:-5,sponsor:-5},
+        ]
+      },
+      {
+        phase:"Planning",
+        title:"Sea Level vs. Lock Canal",
+        situation:"Your chief engineer proposes a sea-level canal — just dig straight through. Chief Engineer John Stevens disagrees: a lock-based system using Gatun Lake is faster, cheaper, and more controllable. The two approaches require completely different strategies. You must choose now.",
+        flavour:"Two engineers are not speaking to each other. The jungle listens.",
+        choices:[
+          {text:"Sea level canal. Simpler in theory, just dig.", outcome:"bad", title:"Geological Nightmare", explanation:"The Culebra Cut through the mountains is 30% harder than estimated. Landslides repeatedly refill excavated sections. At this rate: 40 years.", budget:-20,schedule:-25,team:-10,sponsor:-20},
+          {text:"Lock system. Back Stevens' engineering judgment.", outcome:"good", title:"Engineering Vision!", explanation:"Gatun Lake eliminates 40km of excavation. Ships are lifted over the mountains rather than cutting through them. Faster, safer, cheaper. Genius.", budget:15,schedule:20,team:10,sponsor:15},
+          {text:"Commission a third engineering opinion before deciding.", outcome:"neutral", title:"More Analysis", explanation:"The third opinion agrees with Stevens. Six months lost but the correct decision made with full confidence.", budget:-5,schedule:-10,team:0,sponsor:0},
+        ]
+      },
+      {
+        phase:"Execution",
+        title:"The Culebra Cut",
+        situation:"The 13km cut through the Culebra mountain range is the hardest excavation in history. Landslides repeatedly refill completed sections — sometimes overnight. Workers are demoralised. Goethals says you need steam shovels working 24/7 plus a new drainage strategy.",
+        flavour:"A landslide refills three weeks of excavation in four hours. Someone cries. Possibly you.",
+        choices:[
+          {text:"24/7 operations. Three shifts. More steam shovels.", outcome:"good", title:"Industrial Power!", explanation:"100 steam shovels work around the clock. 170 million cubic metres removed. The mountain yields to relentless human effort.", budget:-15,schedule:15,team:5,sponsor:15},
+          {text:"Fight the landslides with more retaining walls.", outcome:"bad", title:"Treating Symptoms", explanation:"The retaining walls help temporarily but the underlying geology defeats them repeatedly. You spend twice the budget fighting what better drainage would have solved.", budget:-25,schedule:-20,team:-10,sponsor:-10},
+          {text:"Redesign the cut to follow natural geology — gentler slopes.", outcome:"good", title:"Working With Nature", explanation:"Wider slopes following the natural angle eliminate 80% of landslide risk. More excavation volume but dramatically less rework. Elegant engineering.", budget:-5,schedule:5,team:10,sponsor:10},
+        ]
+      },
+      {
+        phase:"Execution",
+        title:"The Gatun Dam Controversy",
+        situation:"Gatun Dam will create the world's largest artificial lake. Engineers back home call it 'dangerously experimental.' Congress is threatening to halt the project. You need to defend the engineering.",
+        flavour:"Senator after senator describes catastrophic flooding scenarios. None of them have been to Panama.",
+        choices:[
+          {text:"Invite a Congressional delegation to Panama to see the engineering.", outcome:"good", title:"Show Don't Tell!", explanation:"The delegation arrives sceptical and leaves converted. Goethals's site presentation is masterful. Congressional opposition collapses within a month.", budget:-3,schedule:0,team:5,sponsor:20},
+          {text:"Commission an independent safety review.", outcome:"neutral", title:"Due Diligence", explanation:"The review takes three months but confirms the design is sound. Congressional confidence is restored through process.", budget:-5,schedule:-10,team:0,sponsor:10},
+          {text:"Ignore Congress. The engineers know best.", outcome:"bad", title:"Political Disaster", explanation:"Congress passes a resolution suspending Gatun Dam funding. Three months of construction stop while the crisis is resolved.", budget:-10,schedule:-15,team:0,sponsor:-20},
+        ]
+      },
+      {
+        phase:"Closing",
+        title:"First Ship Through",
+        situation:"August 1914. The canal is ready. The SS Ancon is preparing the historic first transit. Then news arrives: World War One has just begun in Europe. Every journalist is focused on the war. The greatest engineering achievement in American history is about to be ignored.",
+        flavour:"The SS Ancon sits at the Pacific entrance. The world is looking elsewhere.",
+        choices:[
+          {text:"Proceed quietly. The canal's value speaks for itself.", outcome:"neutral", title:"Dignified Opening", explanation:"The Ancon makes its transit with little ceremony. History records the date but the opening lacks the celebration it deserves. The canal serves the world regardless.", budget:0,schedule:0,team:0,sponsor:0},
+          {text:"Delay the opening until the world can pay attention.", outcome:"bad", title:"Missed Moment", explanation:"The delay makes no strategic sense — the canal is needed immediately for war supplies. The political backlash is severe.", budget:-5,schedule:-15,team:-5,sponsor:-20},
+          {text:"Open it and ensure the achievement is properly documented for history.", outcome:"good", title:"Legacy Secured", explanation:"Comprehensive documentation ensures the achievement is recorded. When the war ends, the world discovers what was built. The canal's story is told properly for generations.", budget:-3,schedule:0,team:5,sponsor:15},
+        ]
+      }
+    ]
+  }
+];
+
+// ══════════════════════════════════════════════
+// GAME STATE
+// ══════════════════════════════════════════════
+let currentProject = null;
+let sceneIndex = 0;
+let stats = {budget:100, schedule:100, team:100, sponsor:100};
+let score = 0;
+let goodChoices = 0;
+
+// ══════════════════════════════════════════════
+// HOME SCREEN
+// ══════════════════════════════════════════════
+function buildHome() {
+  const grid = document.getElementById('projectGrid');
+  grid.innerHTML = '';
+  PROJECTS.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'project-card';
+    card.style.borderTopColor = p.color;
+    card.innerHTML = `
+      <div class="pc-emoji">${p.emoji}</div>
+      <div class="pc-name">${p.name}</div>
+      <div class="pc-era">${p.era}</div>
+      <div class="pc-diff">${p.diff}</div>
+    `;
+    card.onclick = () => startProject(p);
+    grid.appendChild(card);
+  });
+}
+
+// ══════════════════════════════════════════════
+// START PROJECT
+// ══════════════════════════════════════════════
+function startProject(project) {
+  currentProject = project;
+  sceneIndex = 0;
+  stats = {budget:100, schedule:100, team:100, sponsor:100};
+  score = 0;
+  goodChoices = 0;
+
+  document.getElementById('headerName').textContent = `${project.emoji} ${project.name}`;
+  buildPhaseBar();
+  showScreen('game');
+  renderScene();
+}
+
+function buildPhaseBar() {
+  const bar = document.getElementById('phaseBar');
+  bar.innerHTML = '';
+  currentProject.scenes.forEach((_, i) => {
+    const pip = document.createElement('div');
+    pip.className = 'phase-pip';
+    pip.id = `pip-${i}`;
+    bar.appendChild(pip);
+  });
+  updatePhaseBar();
+}
+
+function updatePhaseBar() {
+  currentProject.scenes.forEach((_, i) => {
+    const pip = document.getElementById(`pip-${i}`);
+    if (i < sceneIndex) pip.className = 'phase-pip done';
+    else if (i === sceneIndex) pip.className = 'phase-pip current';
+    else pip.className = 'phase-pip';
+  });
+}
+
+// ══════════════════════════════════════════════
+// RENDER SCENE
+// ══════════════════════════════════════════════
+function renderScene() {
+  const scene = currentProject.scenes[sceneIndex];
+  document.getElementById('scenePhase').textContent = `${scene.phase} · Scene ${sceneIndex + 1} of ${currentProject.scenes.length}`;
+  document.getElementById('sceneTitle').textContent = scene.title;
+  document.getElementById('sceneSituation').textContent = scene.situation;
+  document.getElementById('sceneFlavour').textContent = scene.flavour;
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  scene.choices.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<span class="choice-letter">${String.fromCharCode(65+i)}</span><span>${c.text}</span>`;
+    btn.onclick = () => makeChoice(i);
+    choicesEl.appendChild(btn);
+  });
+
+  const outcomeBox = document.getElementById('outcomeBox');
+  outcomeBox.className = 'outcome-box';
+  outcomeBox.style.display = 'none';
+  document.getElementById('nextBtn').className = 'next-btn';
+  updateStats();
+  updatePhaseBar();
+}
+
+// ══════════════════════════════════════════════
+// MAKE CHOICE
+// ══════════════════════════════════════════════
+function makeChoice(idx) {
+  const scene = currentProject.scenes[sceneIndex];
+  const choice = scene.choices[idx];
+
+  // apply stat changes
+  stats.budget   = Math.max(0, Math.min(100, stats.budget   + choice.budget));
+  stats.schedule = Math.max(0, Math.min(100, stats.schedule + choice.schedule));
+  stats.team     = Math.max(0, Math.min(100, stats.team     + choice.team));
+  stats.sponsor  = Math.max(0, Math.min(100, stats.sponsor  + choice.sponsor));
+
+  if (choice.outcome === 'good') { score += 20; goodChoices++; }
+  else if (choice.outcome === 'neutral') { score += 10; }
+
+  updateStats();
+
+  // style buttons
+  document.querySelectorAll('.choice-btn').forEach((btn, i) => {
+    if (i === idx) btn.className = `choice-btn chosen-${choice.outcome}`;
+    else btn.className = 'choice-btn not-chosen';
+  });
+
+  // show outcome
+  const outcomeBox = document.getElementById('outcomeBox');
+  outcomeBox.className = `outcome-box ${choice.outcome} show`;
+  outcomeBox.style.display = 'block';
+  document.getElementById('outcomeTitle').textContent = choice.title;
+  document.getElementById('outcomeText').textContent = choice.explanation;
+
+  // stat changes display
+  const changes = [];
+  if (choice.budget)   changes.push({label:`💰 Budget ${choice.budget > 0 ? '+' : ''}${choice.budget}`, cls: choice.budget > 0 ? 'sc-pos' : 'sc-neg'});
+  if (choice.schedule) changes.push({label:`⏱ Schedule ${choice.schedule > 0 ? '+' : ''}${choice.schedule}`, cls: choice.schedule > 0 ? 'sc-pos' : 'sc-neg'});
+  if (choice.team)     changes.push({label:`👥 Team ${choice.team > 0 ? '+' : ''}${choice.team}`, cls: choice.team > 0 ? 'sc-pos' : 'sc-neg'});
+  if (choice.sponsor)  changes.push({label:`😤 Sponsor ${choice.sponsor > 0 ? '+' : ''}${choice.sponsor}`, cls: choice.sponsor > 0 ? 'sc-pos' : 'sc-neg'});
+
+  const scEl = document.getElementById('statChange');
+  scEl.innerHTML = changes.map(c => `<span class="sc-item ${c.cls}">${c.label}</span>`).join('');
+
+  document.getElementById('nextBtn').className = 'next-btn show';
+}
+
+// ══════════════════════════════════════════════
+// UPDATE STATS DISPLAY
+// ══════════════════════════════════════════════
+function updateStats() {
+  document.getElementById('statBudget').textContent   = Math.round(stats.budget);
+  document.getElementById('statSchedule').textContent = Math.round(stats.schedule);
+  document.getElementById('statTeam').textContent     = Math.round(stats.team);
+  document.getElementById('statSponsor').textContent  = Math.round(stats.sponsor);
+}
+
+// ══════════════════════════════════════════════
+// NEXT SCENE / END
+// ══════════════════════════════════════════════
+function nextScene() {
+  sceneIndex++;
+  if (sceneIndex >= currentProject.scenes.length) {
+    showEnd();
+  } else {
+    renderScene();
+    window.scrollTo(0, 0);
+  }
+}
+
+// ══════════════════════════════════════════════
+// END SCREEN
+// ══════════════════════════════════════════════
+function showEnd() {
+  const avgStats = Math.round((stats.budget + stats.schedule + stats.team + stats.sponsor) / 4);
+  const finalScore = Math.round((score + avgStats) / 2);
+
+  let emoji, title, verdict;
+
+  if (finalScore >= 80) {
+    emoji = '🏆';
+    title = 'Legendary Project Manager!';
+    verdict = `You delivered one of history's greatest projects with skill, wisdom, and just a touch of genius. They'll be telling this story for centuries.`;
+  } else if (finalScore >= 60) {
+    emoji = '🎉';
+    title = 'Project Delivered!';
+    verdict = `Bumpy in places, but you got there. History will remember this as a success — even if the budget meeting was uncomfortable.`;
+  } else if (finalScore >= 40) {
+    emoji = '😅';
+    title = 'Technically Complete';
+    verdict = `The project is done. Whether it's a success depends entirely on who's writing the history books. The team needs a holiday.`;
+  } else {
+    emoji = '😬';
+    title = 'Over Budget, Over Time...';
+    verdict = `You've joined a long and distinguished tradition of project managers who learned the hard way. The good news: the Channel Tunnel exists, even if it cost 3x the estimate.`;
+  }
+
+  document.getElementById('endProject').textContent = `${currentProject.emoji} ${currentProject.name}`;
+  document.getElementById('endEmoji').textContent = emoji;
+  document.getElementById('endTitle').textContent = title;
+  document.getElementById('endScore').textContent = finalScore;
+  document.getElementById('endVerdict').textContent = verdict;
+  document.getElementById('endBudget').textContent   = Math.round(stats.budget);
+  document.getElementById('endSchedule').textContent = Math.round(stats.schedule);
+  document.getElementById('endTeam').textContent     = Math.round(stats.team);
+  document.getElementById('endSponsor').textContent  = Math.round(stats.sponsor);
+
+  showScreen('end');
+}
+
+function replayProject() {
+  startProject(currentProject);
+}
+
+function goHome() {
+  showScreen('home');
+}
+
+// ══════════════════════════════════════════════
+// SCREEN MANAGEMENT
+// ══════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+buildHome();
+</script>
+</body>
+</html>
